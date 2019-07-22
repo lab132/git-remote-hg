@@ -273,9 +273,16 @@ class Parser:
 
 def fix_file_path(path):
     path = os.path.normpath(path)
+    # Git wants forward slashes on all platforms
+    # otherwise we would create different commits based on identical paths
+    # also in some cases paths were stored as "Foo\Bar.txt",
+    # including the double quotation marks
+    # We don't want them in our path
+    path = path.replace(os.sep, "/").replace("\"", "")
     if not os.path.isabs(path):
         return path
-    return os.path.relpath(path, '/')
+    # Replace again, to be sure relpath is not normalizing the path again
+    return os.path.relpath(path, '/').replace(os.sep, "/").replace("\"", "")
 
 def export_files(files):
     final = []
